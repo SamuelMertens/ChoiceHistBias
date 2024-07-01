@@ -1,0 +1,64 @@
+# Title: Evidence for a choice-history Bias in Pain Intensity Judgments: A modelling Approach.
+
+#-----
+# Model 0: Baseline model without any biases
+
+# Author: Samuel Mertens (a) + Fabrice Hubschmid (a,b)
+# Affiliations: (a) Department of Experimental Psychology, Faculty of Mathematics and Natural Sciences, Heinrich-Heine University, Düsseldorf, Germany
+#               (b) Institute of Clinical Neuroscience and Medical Psychology, Medical Faculty, Heinrich-Heine University, Düsseldorf, Germany
+# Contact info: samuel.mertens@hhu.de
+
+# Based on the functions and tutorial scripts available online at:
+# https://hddm.readthedocs.io/en/latest/
+
+#-----
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import hddm
+import kabuki
+import seaborn as sns
+from scipy import stats
+
+data = pd.read_csv('/Users/student/Desktop/MasterthesisData/CHBPain_HDDM.csv',sep=',')
+data.head(10)
+
+from kabuki.analyze import gelman_rubin
+
+models = []
+for i in range(6):
+    HDDM0 = hddm.HDDMStimCoding(data, stim_col='stim_type', split_param = 'v', drift_criterion = True, bias = True, p_outlier = 0.05)
+    HDDM0.find_starting_values()
+    HDDM0.sample(10000, burn = 5000, thin = 5, dbname = 'traces.db', db = 'pickle')
+    models.append(HDDM0)
+    
+np.max(list(gelman_rubin(models).values()))
+
+HDDM0_concat = kabuki.utils.concat_models(models)
+
+HDDM0_concat.plot_posteriors()
+
+HDDM0_concat.print_stats()
+
+HDDM0_traces = HDDM0_concat.get_traces()
+
+HDDM0_traces.to_csv(r'C:\Users\student\Desktop\MasterthesisData\CHB_HDDM0.csv', index = False, header = True, sep = ';')
+
+t, a, v, dc, z = HDDM0.nodes_db.node[["t", "a", "v", "dc", "z"]]
+samples = {"t": t.trace(), "a": a.trace(), "v": v.trace(), "dc": dc.trace(), "z": z.trace()}
+samp = pd.DataFrame(data=samples)
+
+
+def corrfunc(x, y, **kws):
+    r, _ = stats.pearsonr(x, y)
+    ax = plt.gca()
+    ax.annotate("r = {:.2f}".format(r), xy=(0.1, 0.9), xycoords=ax.transAxes)
+
+
+g = sns.PairGrid(samp, palette=["red"])
+g.map_upper(plt.scatter, s=10)
+g.map_diag(sns.distplot, kde=False)
+g.map_lower(sns.kdeplot, cmap="Blues_d")
+g.map_lower(corrfunc)
+g.savefig("HDDM_0_matrix_plot.png")
