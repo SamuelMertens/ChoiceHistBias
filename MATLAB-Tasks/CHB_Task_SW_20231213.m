@@ -1,5 +1,18 @@
 
 
+%   % (intro)
+%=========================================================================%
+% THERMAL TWO-INTERVAL FORCED CHOICE
+%=========================================================================%
+
+% AUTHORS: 
+
+%      1. Fabrice Hubschmid (a,b)
+%      2. Samuel Mertens (b)
+
+%        a. Institute of Clinical Neuroscience and Medical Psychology,
+%           Medical Faculty, Heinrich-Heine University, Düsseldorf, Germany
+
 %        b. Department of Experimental Psychology, Faculty of
 %           Mathematics and Natural Sciences, Heinrich-Heine University,
 %           Düsseldorf, Germany
